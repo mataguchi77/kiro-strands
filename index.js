@@ -4,14 +4,25 @@ import { BedrockRuntimeClient, InvokeModelCommand } from '@aws-sdk/client-bedroc
 const agentClient = new BedrockAgentRuntimeClient({ region: process.env.AWS_REGION || 'us-east-1' });
 const runtimeClient = new BedrockRuntimeClient({ region: process.env.AWS_REGION || 'us-east-1' });
 
-export async function handler(event) {
-  const { question } = event;
+export const handler = async (event, context) => {
+  console.log('Event:', JSON.stringify(event, null, 2));
+  
+  // Extract input from AgentCore event structure
+  const inputText = event.inputText || event.question || event.input;
+  
+  if (!inputText) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: 'No question provided' })
+    };
+  }
+
   try {
     // Retrieve relevant context from Knowledge Base
     const retrieveCommand = new RetrieveCommand({
       knowledgeBaseId: process.env.KNOWLEDGE_BASE_ID,
       retrievalQuery: {
-        text: question
+        text: inputText
       }
     });
     
@@ -29,7 +40,7 @@ export async function handler(event) {
 Context:
 ${context}
 
-Question: ${question}
+Question: ${inputText}
 
 Answer:`;
     
@@ -52,19 +63,32 @@ Answer:`;
     const invokeResponse = await runtimeClient.send(invokeCommand);
     const responseBody = JSON.parse(new TextDecoder().decode(invokeResponse.body));
     
+    const answer = responseBody.content[0].text;
+    const sources = retrieveResponse.retrievalResults?.map(result => ({
+      location: result.location,
+      score: result.score
+    }));
+    
+    // Return in AgentCore format
     return {
-      answer: responseBody.content[0].text,
-      sources: retrieveResponse.retrievalResults?.map(result => ({
-        location: result.location,
-        score: result.score
-      }))
+      statusCode: 200,
+      body: JSON.stringify({
+        answer,
+        sources,
+        metadata: {
+          modelId,
+          knowledgeBaseId: process.env.KNOWLEDGE_BASE_ID,
+          retrievalCount: sources?.length || 0
+        }
+      })
     };
   } catch (error) {
     console.error('Error processing question:', error);
     return {
-      error: `Failed to answer question: ${error.message}`
+      statusCode: 500,
+      body: JSON.stringify({
+        error: `Failed to answer question: ${error.message}`
+      })
     };
   }
-}
-
-export default handler;
+};

@@ -1,17 +1,14 @@
 {
-  "name": "bedrock-qa-strands",
+  "name": "bedrock-qa-agent",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "strands dev",
-    "build": "strands build"
+    "build": "sam build",
+    "deploy": "sam deploy --guided",
+    "local": "sam local invoke BedrockQAFunction -e test-event.json"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-agent-runtime": "^3.700.0",
-    "@aws-sdk/client-bedrock-runtime": "^3.700.0",
-    "@strands/core": "^0.1.0"
-  },
-  "devDependencies": {
-    "@strands/cli": "^0.1.0"
+    "@aws-sdk/client-bedrock-runtime": "^3.700.0"
   }
 }

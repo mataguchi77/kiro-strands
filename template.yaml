@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Bedrock AgentCore QA Agent
+
+Parameters:
+  KnowledgeBaseId:
+    Type: String
+    Description: Bedrock Knowledge Base ID
+  ModelId:
+    Type: String
+    Default: anthropic.claude-3-sonnet-20240229-v1:0
+    Description: Bedrock Model ID
+
+Resources:
+  BedrockQAFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: bedrock-qa-agent
+      Handler: index.handler
+      Runtime: nodejs20.x
+      CodeUri: .
+      Timeout: 30
+      MemorySize: 512
+      Environment:
+        Variables:
+          AWS_REGION: !Ref AWS::Region
+          KNOWLEDGE_BASE_ID: !Ref KnowledgeBaseId
+          MODEL_ID: !Ref ModelId
+      Policies:
+        - Statement:
+          - Effect: Allow
+            Action:
+              - bedrock:InvokeModel
+              - bedrock:Retrieve
+            Resource: '*'
+
+Outputs:
+  FunctionArn:
+    Description: Lambda Function ARN
+    Value: !GetAtt BedrockQAFunction.Arn
+  FunctionName:
+    Description: Lambda Function Name
+    Value: !Ref BedrockQAFunction

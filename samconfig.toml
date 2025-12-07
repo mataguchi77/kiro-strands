@@ -1,0 +1,9 @@
+version = 0.1
+
+[default.deploy.parameters]
+stack_name = "bedrock-qa-agent"
+resolve_s3 = true
+s3_prefix = "bedrock-qa-agent"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "KnowledgeBaseId=\"YOUR_KB_ID\" ModelId=\"anthropic.claude-3-sonnet-20240229-v1:0\""

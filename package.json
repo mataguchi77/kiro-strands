@@ -1,0 +1,17 @@
+{
+  "name": "bedrock-qa-strands",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "strands dev",
+    "build": "strands build"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-agent-runtime": "^3.700.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.700.0",
+    "@strands/core": "^0.1.0"
+  },
+  "devDependencies": {
+    "@strands/cli": "^0.1.0"
+  }
+}
